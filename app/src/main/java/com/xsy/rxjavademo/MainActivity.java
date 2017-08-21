@@ -1,5 +1,6 @@
 package com.xsy.rxjavademo;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.xsy.rxjavademo.model.BaseAction;
 import com.xsy.rxjavademo.model.ZhuangbiImage;
 import com.xsy.rxjavademo.retrofit.GetAPI;
 import com.xsy.rxjavademo.retrofit.PostAPI;
@@ -23,8 +25,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private PostAPI postAPI;
     private RetrofitAPI retrofitAPI;
     private SwipeRefreshLayout mRefresh;
+    private Retrofit retrofit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,19 +58,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.bt_three).setOnClickListener(this);
         findViewById(R.id.bt_four).setOnClickListener(this);
         findViewById(R.id.bt_five).setOnClickListener(this);
+        findViewById(R.id.bt_six).setOnClickListener(this);
         okHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(60, TimeUnit.SECONDS)//连接超时时间
                 .writeTimeout(60, TimeUnit.SECONDS)//写操作 超时时间
                 .readTimeout(60, TimeUnit.SECONDS)//读操作超时时间
                 .build();
-        /**
-         * 初始化Retrofit,使用okHttp请求，支持Gson解析，支持RxJava
-         */
-        Retrofit retrofit = new Retrofit.Builder().client(okHttpClient)
-                .baseUrl("http://www.zhuangbi.info/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
+        retrofit = RetrofitUtil.getInstance().initRetrofit("http://www.zhuangbi.info/");
         getAPI = retrofit.create(GetAPI.class);
         postAPI = retrofit.create(PostAPI.class);
         retrofitAPI = retrofit.create(RetrofitAPI.class);
@@ -94,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
                 break;
             case R.id.bt_two://RxJava+Retrofit+OkHttp练习
-                subscription = getAPI.get("110")
+                subscription = getAPI.get("lllllllll")
                         /**
                          * subscribeOn(): 指定 subscribe() 所发生的线程，
                          * 即 Observable.OnSubscribe 被激活时所处的线程。或者叫做事件产生的线程
@@ -105,29 +100,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                          * 或者叫做事件消费的线程。
                          */
                         .observeOn(AndroidSchedulers.mainThread())//让观察者在主线程运行，观察者操作是请求成功后的处理
-                        .subscribe(new Subscriber<List<ZhuangbiImage>>() {//订阅
+//                        .subscribe(new Subscriber<List<ZhuangbiImage>>() {//订阅
+//                            @Override
+//                            public void onCompleted() {
+//
+//                            }
+//
+//                            @Override
+//                            public void onError(Throwable e) {
+//                                mRefresh.setRefreshing(false);
+//                                Log.e("flag--", "onError(MainActivity.java:97)-->>" + e.getMessage());
+//                            }
+//
+//                            @Override
+//                            public void onNext(List<ZhuangbiImage> s) {
+//                                mRefresh.postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        mRefresh.setRefreshing(false);
+//                                    }
+//                                },500);
+//                                Toast.makeText(MainActivity.this, "get请求成功--" + s.get(0).description, Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
+                .subscribe(new BaseAction<List<ZhuangbiImage>>(new CallbackListener() {
+                    @Override
+                    public void onSuccess(Object data) {
+                        mRefresh.postDelayed(new Runnable() {
                             @Override
-                            public void onCompleted() {
-
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
+                            public void run() {
                                 mRefresh.setRefreshing(false);
-                                Log.e("flag--", "onError(MainActivity.java:97)-->>" + e.getMessage());
                             }
+                        },500);
+//                        List<ZhuangbiImage> list = (List<ZhuangbiImage>) data;
+//                        String description = list.get(0).description;
+//                        Toast.makeText(MainActivity.this, description, Toast.LENGTH_SHORT).show();
+                    }
 
+                    @Override
+                    public void onFailure(String msg) {
+                        mRefresh.postDelayed(new Runnable() {
                             @Override
-                            public void onNext(List<ZhuangbiImage> s) {
-                                mRefresh.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mRefresh.setRefreshing(false);
-                                    }
-                                },500);
-                                Toast.makeText(MainActivity.this, "get请求成功--" + s.get(0).description, Toast.LENGTH_SHORT).show();
+                            public void run() {
+                                mRefresh.setRefreshing(false);
                             }
-                        });
+                        },500);
+                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                }));
                 break;
             case R.id.bt_three:////RxJava+Retrofit+OkHttp Post练习
                 Map<String, String> map = new HashMap<>();
@@ -198,6 +218,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(MainActivity.this, "RxJava的map转换--"+s, Toast.LENGTH_SHORT).show();
                     }
                 });
+                break;
+            case R.id.bt_six:
+                startActivity(new Intent(this,GifActivity.class));
                 break;
         }
     }
