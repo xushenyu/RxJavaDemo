@@ -2,7 +2,6 @@ package com.xsy.rxjavademo;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,7 @@ class ImageAdapter extends RecyclerView.Adapter {
 
     private Context mContext;
     private List<ZhuangbiImage> mList;
-    private Map<Integer,GifDrawable> map = new HashMap<>();
+    private Map<Integer, GifDrawable> map = new HashMap<>();
 
     public ImageAdapter(Context gifActivity, List<ZhuangbiImage> mList) {
         this.mContext = gifActivity;
@@ -44,7 +43,7 @@ class ImageAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final MyViewHodler myHolder = (MyViewHodler) holder;
-        myHolder.setPosition(position);
+        myHolder.setPosition(position);//position传给VIewHolder
         Glide.with(mContext).load(mList.get(position).image_url).asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .placeholder(R.mipmap.ic_launcher).listener(new RequestListener<String, GifDrawable>() {
             @Override
@@ -53,8 +52,14 @@ class ImageAdapter extends RecyclerView.Adapter {
             }
 
             @Override
-            public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                map.put(position,resource);
+            public boolean onResourceReady(final GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                myHolder.iv.post(new Runnable() {
+                    @Override
+                    public void run() {//GifDrawable要在UI线程才能操作
+                        resource.stop();//gif加载成功后，暂停所有播放
+                    }
+                });
+                map.put(position, resource);//缓存GifDrawable，如果存多了不知道会不会oom
                 return false;
             }
         }).into(myHolder.iv);
@@ -66,31 +71,36 @@ class ImageAdapter extends RecyclerView.Adapter {
         return mList.size();
     }
 
-    public void clearGifCache(){
-        map.clear();
+    public void clearGifCache() {
+        map.clear();//清除缓存
     }
 
-    class MyViewHodler extends RecyclerView.ViewHolder {
+    public class MyViewHodler extends RecyclerView.ViewHolder {
         public ImageView iv;
         private int position;
+        private Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (map.size() > 0 && map.get(position) != null) {
+                    map.get(position).start();//可见时，2s后播放
+                }
+            }
+        };
 
         public MyViewHodler(View itemView) {
             super(itemView);
             iv = (ImageView) itemView.findViewById(R.id.iv);
             itemView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                 @Override
-                public void onViewAttachedToWindow(View v) {
-                    if (map.size()>0&&map.get(position)!=null) {
-                        map.get(position).start();
-                        Log.e("flag--","onViewAttachedToWindow(ImageAdapter.java:105)-->>"+"开始");
-                    }
+                public void onViewAttachedToWindow(View v) {//此方法会在Glide.listener之前运行
+                    iv.postDelayed(runnable, 2000);
                 }
 
                 @Override
                 public void onViewDetachedFromWindow(View v) {
-                    if (map.size()>0&&map.get(position)!=null) {
-                        map.get(position).stop();
-                        Log.e("flag--","onViewDetachedFromWindow(ImageAdapter.java:112)-->>"+"暂停");
+                    iv.removeCallbacks(runnable);//item不可见时，回收线程
+                    if (map.size() > 0 && map.get(position) != null) {
+                        map.get(position).stop();//不可见时暂停播放
                     }
                 }
             });
