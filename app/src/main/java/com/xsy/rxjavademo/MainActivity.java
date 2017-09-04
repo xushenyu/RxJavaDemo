@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.bt_four).setOnClickListener(this);
         findViewById(R.id.bt_five).setOnClickListener(this);
         findViewById(R.id.bt_six).setOnClickListener(this);
+        findViewById(R.id.bt_seven).setOnClickListener(this);
         okHttpClient = new OkHttpClient.Builder()
                 .connectTimeout(60, TimeUnit.SECONDS)//连接超时时间
                 .writeTimeout(60, TimeUnit.SECONDS)//写操作 超时时间
@@ -221,6 +222,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.bt_six:
                 startActivity(new Intent(this,GifActivity.class));
+                break;
+            case R.id.bt_seven:
+                startActivity(new Intent(this,FrescoActivity.class));
                 break;
         }
     }

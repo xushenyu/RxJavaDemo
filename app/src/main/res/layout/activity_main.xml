@@ -19,7 +19,8 @@
             <Button
                 android:id="@+id/bt_one"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
                 android:layout_marginTop="30dp"
@@ -30,7 +31,8 @@
             <Button
                 android:id="@+id/bt_two"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="30dp"
                 android:text="RxJava+Retrofit+Okhttp发送get请求"
@@ -40,7 +42,8 @@
             <Button
                 android:id="@+id/bt_three"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="30dp"
                 android:text="RxJava+Retrofit+Okhttp发送post请求"
@@ -50,7 +53,8 @@
             <Button
                 android:id="@+id/bt_four"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
                 android:layout_marginTop="30dp"
@@ -61,7 +65,8 @@
             <Button
                 android:id="@+id/bt_five"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
                 android:layout_marginTop="30dp"
@@ -71,11 +76,23 @@
             <Button
                 android:id="@+id/bt_six"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
                 android:layout_marginTop="30dp"
                 android:text="Glide加载gif"
+                android:textColor="#000"
+                android:textSize="14sp" />
+            <Button
+                android:id="@+id/bt_seven"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="30dp"
+                android:text="Fresco练习"
                 android:textColor="#000"
                 android:textSize="14sp" />
         </LinearLayout>
